@@ -22,7 +22,11 @@ function check_required_plugins() {
         'gravityperks/gravityperks.php' => 'Gravity Perks',
         'gravityformsadvancedpostcreation/advancedpostcreation.php' => 'Gravity Forms Advanced Post Creation Add-On',
         'gravityformsuserregistration/userregistration.php' => 'Gravity Forms User Registration Add-On',
-        // Add other required plugins here.
+        'gp-advanced-select/gp-advanced-select.php' => 'GP Advanced Select',
+        'gp-file-upload-pro/gp-file-upload-pro.php' => 'GP File Upload Pro',
+        'gp-media-library/gp-media-library.php' => 'GP Media Library',
+        'gp-populate-anything/gp-populate-anything.php' => 'GP Populate Anything',
+        'gp-notification-scheduler/gp-notification-scheduler.php' => 'GP Notification Scheduler'
     );
 
     $missing_plugins = array();
