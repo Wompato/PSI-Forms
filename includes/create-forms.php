@@ -1,5 +1,4 @@
 <?php
-
 namespace PSI_Forms;
 
 function create_forms() {
@@ -13,31 +12,22 @@ function create_forms() {
     // Get an array of all files in the form templates directory
     $form_template_files = array_diff(scandir($form_templates_dir), ['.', '..']);
 
+    // Current site domain
+    $current_site_domain = get_site_url(); // Get the current site's URL
+
+    
+
     // Loop over each file in the directory
     foreach ($form_template_files as $file) {
-        // Construct the full path to the file
         $file_path = $form_templates_dir . $file;
-
-        // Ensure it's a file
-        if (!is_file($file_path)) {
+        if (!is_file($file_path) || pathinfo($file_path, PATHINFO_EXTENSION) !== 'json') {
             continue;
         }
 
-        // Include the file and get the form array
-        $form = require $file_path;
+        $file_contents = file_get_contents( $file_path );
+        $updated_contents = str_replace('{placeholder_domain}', $current_site_domain, $file_contents);
 
-        // Create the form using GFAPI
-        $form_id = \GFAPI::add_form($form);
+        \GFExport::import_json($updated_contents);
 
-        if (!is_wp_error($form_id)) {
-            // Form created successfully
-            error_log("Form created successfully with ID: " . $form_id);
-        } else {
-            // There was an error creating the form
-            error_log("Error creating form: " . $form_id->get_error_message());
-        }
     }
 }
-?>
-
-

@@ -44,23 +44,36 @@ function check_required_plugins() {
 add_action('admin_notices', __NAMESPACE__ . '\\admin_notices');
 
 function admin_notices() {
+    $missing_plugins = get_option('psi_forms_missing_plugins');
+
+    if (!empty($missing_plugins)) {
+        $message = 'PSI Forms requires the following plugins to be installed and active: ' . implode(', ', $missing_plugins);
+        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+        // Remove the option after displaying the notice.
+        delete_option('psi_forms_missing_plugins');
+    }
+}
+
+// Check dependencies on plugin activation.
+register_activation_hook(__FILE__, __NAMESPACE__ . '\\on_activation');
+
+function on_activation() {
     $missing_plugins = check_required_plugins();
 
     if (!empty($missing_plugins)) {
-        $message = 'My Gravity Forms Plugin requires the following plugins to be installed and active: ' . implode(', ', $missing_plugins);
-        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
-    }
-}
-
-// Only include the form creation logic if all required plugins are active.
-add_action('admin_init', __NAMESPACE__ . '\\init_plugin');
-
-function init_plugin() {
-    if (empty(check_required_plugins())) {
+        // Deactivate the plugin.
+        deactivate_plugins(plugin_basename(__FILE__));
+        // Store missing plugins in an option to display in an admin notice.
+        update_option('psi_forms_missing_plugins', $missing_plugins);
+        // Prevent the plugin from being activated.
+        wp_die(
+            'PSI Forms requires the following plugins to be installed and active: ' . implode(', ', $missing_plugins),
+            'Plugin dependency check',
+            array('back_link' => true)
+        );
+    } else {
         // Include the form creation logic.
         require_once plugin_dir_path(__FILE__) . 'includes/create-forms.php';
-        // Activation hook to create forms.
-        register_activation_hook(__FILE__, __NAMESPACE__ . '\\create_forms');
+        create_forms(); // Call the form creation function during activation
     }
 }
-?>
